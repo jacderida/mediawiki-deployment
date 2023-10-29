@@ -1,8 +1,8 @@
-# mediawiki-deployment
+# Mediawiki Deployment
 
-Provides an extremely simple deployment of Mediawiki that's intended to run on a single EC2 instance.
+Provides an extremely simple Mediawiki deployment intended to run on a single EC2 instance.
 
-The AWS infrastructure is created with Terraform, then Ansible is used for provisioning. The setup uses a few containers which are coordinated using Docker Compose. A systemd service easily controls the use of Compse. It is not a completely automated setup.
+The AWS infrastructure is created with Terraform and Ansible is used for provisioning. The setup uses a few containers which are coordinated using Docker Compose. A Systemd service controls the use of Compose. It is not a completely automated setup, but the whole process is documented.
 
 ## Prerequisites
 
