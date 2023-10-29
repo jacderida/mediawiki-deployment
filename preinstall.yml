@@ -1,0 +1,92 @@
+---
+- name: preinstall
+  hosts: mediawiki
+  become: True
+  tasks:
+    - name: update yum cache
+      yum:
+        update_cache: yes
+      register: result
+      until: result is succeeded
+      retries: 5
+      delay: 10
+
+    - name: install docker
+      yum:
+        name: docker
+        state: present
+      register: result
+      until: result is succeeded
+      retries: 5
+      delay: 10
+
+    - name: enable and start docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: install docker-compose
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: format the extra disk
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/nvme1n1
+
+    - name: mount the disk
+      ansible.builtin.mount:
+        path: /mnt/data
+        src: /dev/nvme1n1
+        fstype: ext4
+        state: mounted
+
+    - name: create directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - /mnt/data/mariadb
+        - /mnt/data/mediawiki
+
+    - name: copy docker-compose file
+      ansible.builtin.copy:
+        src: ./docker-compose.yml
+        dest: /mnt/data/docker-compose.yml
+
+    - name: copy nginx config
+      ansible.builtin.copy:
+        src: ./nginx.conf
+        dest: /mnt/data/nginx.conf
+
+    - name: copy logo
+      ansible.builtin.copy:
+        src: ./logo.png
+        dest: /mnt/data/mediawiki/logo.png
+
+    - name: copy .env file
+      ansible.builtin.copy:
+        src: ./.env
+        dest: /mnt/data/.env
+
+    - name: create service for mediawiki
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=Mediawiki
+          [Service]
+          WorkingDirectory=/mnt/data
+          ExecStart=/usr/local/bin/docker-compose up
+          ExecStop=/usr/local/bin/docker-compose down
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/mediawiki.service
+
+    - name: enable and start mediawiki
+      systemd:
+        name: mediawiki
+        state: started
+        enabled: yes

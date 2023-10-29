@@ -1,0 +1,29 @@
+version: '3.1'
+services:
+  mediawiki:
+    image: mediawiki
+    ports:
+      - "8080:80"
+    volumes:
+      - "/mnt/data/mediawiki:/var/www/html/images"
+      - "/mnt/data/LocalSettings.php:/var/www/html/LocalSettings.php"
+    links:
+      - mariadb
+  mariadb:
+    image: mariadb:10.5
+    environment:
+      MARIADB_DATABASE: wiki
+      MARIADB_USER: wiki
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    volumes:
+      - "/mnt/data/mariadb:/var/lib/mysql"
+  nginx-proxy:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /mnt/data/nginx.conf:/etc/nginx/nginx.conf
+    links:
+      - mediawiki

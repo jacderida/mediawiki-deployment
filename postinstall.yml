@@ -1,0 +1,19 @@
+---
+- name: post install
+  hosts: mediawiki
+  become: True
+  tasks:
+    - name: copy the new docker-compose file
+      ansible.builtin.copy:
+        src: ./docker-compose-post-install.yml
+        dest: /mnt/data/docker-compose.yml
+
+    - name: copy the new LocalSettings.php file
+      ansible.builtin.copy:
+        src: ./LocalSettings.php
+        dest: /mnt/data/LocalSettings.php
+
+    - name: restart mediawiki
+      systemd:
+        name: mediawiki
+        state: restarted

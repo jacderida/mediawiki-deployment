@@ -1,0 +1,6 @@
+terraform/.terraform
+.env
+*.tfstate
+*.tfstate.backup
+inventory
+LocalSettings.php
