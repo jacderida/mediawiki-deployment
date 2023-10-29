@@ -7,3 +7,7 @@ variable "instance_type" {
   default = "t3.medium"
   description = "vCPU: 2, Mem: 4GB"
 }
+
+variable "backup_bucket_name" {
+  default = "911archive-mediawiki-backups"
+}

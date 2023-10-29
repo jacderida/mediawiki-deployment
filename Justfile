@@ -30,3 +30,9 @@ clean:
   set -e
   cd terraform
   terraform destroy -auto-approve
+
+restore:
+  #!/usr/bin/env bash
+  set -e
+  just preinstall
+  ansible-playbook --inventory inventory restore.yml

@@ -4,6 +4,8 @@ Provides an extremely simple Mediawiki deployment intended to run on a single EC
 
 The AWS infrastructure is created with Terraform and Ansible is used for provisioning. The setup uses a few containers which are coordinated using Docker Compose. A Systemd service controls the use of Compose. It is not a completely automated setup, but the whole process is documented.
 
+SSL is not configured yet.
+
 ## Prerequisites
 
 Install Terraform and Ansible on your platform. Due to the use of Ansible, if you use Windows, you'll need to run the process from WSL. The use of a virtualenv is recommended for Ansible. Install [just](https://github.com/casey/just) on your platform.
@@ -109,3 +111,18 @@ just postinstall
 ```
 
 Access the wiki using the elastic IP. You should be able to log in as the admin user you created in the install process, and the custom logo should be visible.
+
+## Backup and Restore
+
+The initial setup is deployed with a backup script that copies the necessary files and directories up to S3. It runs as a cron job on a nightly basis. There is a very brief period of downtime during the backup process; maybe something like 5 seconds.
+
+We can restore a backup to a completely fresh EC2 instance using a slightly different process. All the initial steps in the setup section are necessary to install the tools. Then, after that, you can run:
+```
+just restore
+```
+
+This will re-create the infrastructure and run an Ansible playbook which will do almost everything the same way as the preinstall playbook, with a few minor differences, like not starting the service.
+
+After running this script and getting a new Elastic IP, update the DNS A record to point to said IP.
+
+Next, SSH into the new instance and run the restore script at `/mnt/data/restore.sh`. As an argument to the script, you need to supply the name of one of the zip files in the S3 bucket. This should restore all the data, and after this, you can run `systemctl start mediawiki`. At that point, the Mediawiki instance should be accessible again with the data from the backup point.

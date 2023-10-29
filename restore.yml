@@ -1,5 +1,5 @@
 ---
-- name: preinstall
+- name: copy docker compose file
   hosts: mediawiki
   become: True
   tasks:
@@ -52,9 +52,9 @@
         - /mnt/data/mariadb
         - /mnt/data/mediawiki
 
-    - name: copy docker-compose file
+    - name: copy the new docker-compose file
       ansible.builtin.copy:
-        src: ./docker-compose.yml
+        src: ./docker-compose-post-install.yml
         dest: /mnt/data/docker-compose.yml
 
     - name: copy nginx config
@@ -106,8 +106,9 @@
           WantedBy=multi-user.target
         dest: /etc/systemd/system/mediawiki.service
 
-    - name: enable and start mediawiki
+    # The service will be started after running the restore script
+    - name: enable but do not start the mediawiki service
       systemd:
         name: mediawiki
-        state: started
+        state: stopped
         enabled: yes

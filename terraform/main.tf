@@ -71,6 +71,7 @@ resource "aws_instance" "mediawiki" {
   subnet_id     = aws_subnet.mediawiki.id
   key_name      = aws_key_pair.mediawiki.key_name
   vpc_security_group_ids = [aws_security_group.mediawiki.id]
+  iam_instance_profile = aws_iam_instance_profile.upload_backups.name
   tags = {
     Name = "mediawiki"
   }
