@@ -1,5 +1,8 @@
 #!/usr/bin/env just --justfile
 
+set dotenv-load := true
+wiki_domain_name := env_var('WIKI_DOMAIN_NAME')
+
 preinstall:
   #!/usr/bin/env bash
   set -e
@@ -14,7 +17,7 @@ preinstall:
   $ip_address ansible_ssh_private_key_file=~/.ssh/mediawiki ansible_ssh_user=ec2-user ansible_ssh_common_args='-o StrictHostKeyChecking=no'
   EOF
 
-  ansible-playbook --inventory inventory preinstall.yml
+  ansible-playbook --inventory inventory preinstall.yml --extra-vars wiki_domain_name={{wiki_domain_name}}
 
 postinstall:
   #!/usr/bin/env bash
@@ -36,4 +39,4 @@ restore:
   #!/usr/bin/env bash
   set -e
   just preinstall
-  ansible-playbook --inventory inventory restore.yml
+  ansible-playbook --inventory inventory restore.yml --extra-vars wiki_domain_name={{wiki_domain_name}}

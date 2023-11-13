@@ -19,6 +19,7 @@ export AWS_DEFAULT_REGION=<your region>
 
 Provide the MariaDB passwords by creating a `.env` file at the root of this directory, and populate it as follows:
 ```
+WIKI_DOMAIN_NAME=<your domain name>
 MARIADB_PASSWORD=<password>
 MARIADB_ROOT_PASSWORD=<password>
 ```
@@ -41,9 +42,11 @@ just preinstall
 
 This will run Terraform, then Ansible, which should result in Mediawiki deployed on the EC2 instance.
 
-## Mediawiki Installation
+Now go to your DNS provider and create an A record which points your domain to the elastic IP address assigned to the EC2 instance.
 
-The Mediawiki instance should now be accessible using https://<elastic-ip>. It now needs to go through an installation phase.
+To confirm that the A record is available, you can use `dig A <your domain> @1.1.1.1 +noall +answer`.
+
+## Mediawiki Installation
 
 ### Create Database User
 
@@ -69,7 +72,9 @@ This should allow the install process to complete.
 
 ### Install Process
 
-Return to the Mediawiki instance in the browser and go through the install, which has a wizard-type interface with several pages.
+The Mediawiki instance should now be accessible using http://<your domain>. It now needs to go through an installation phase.
+
+Go to the Mediawiki instance in the browser and go through the install, which has a wizard-type interface with several pages.
 
 On the 'Connect to Database' page, use these for the values:
 ```
@@ -100,10 +105,12 @@ Copy the file to the root of this repository directory.
 
 Now make a couple of edits to it:
 ```
-$wgServer = "https://<elastic ip>";
+$wgServer = "http://<your domain>";
 # Remove the $wgLogos declaration
 $wgLogo = "$wgResourceBasePath/images/logo.png";
 ```
+
+Note: `$wgServer` may already be correctly set.
 
 Now run the post-install playbook:
 ```

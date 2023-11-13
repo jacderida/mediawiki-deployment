@@ -58,8 +58,8 @@
         dest: /mnt/data/docker-compose.yml
 
     - name: copy nginx config
-      ansible.builtin.copy:
-        src: ./nginx.conf
+      ansible.builtin.template:
+        src: ./nginx.conf.j2
         dest: /mnt/data/nginx.conf
 
     - name: copy logo
